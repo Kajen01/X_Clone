@@ -37,7 +37,7 @@ const signup = async (req, res) => {
             // Generate jwt and send cookie with response
             generateToken(newUser._id, res)
             await newUser.save()
-            // res.ststus(200).json({message: "User created Sucessfully"})
+            // res.status(200).json({message: "User created Sucessfully"})
             // For testing with postman
             res.status(200).json({
                 _id: newUser._id,
@@ -66,7 +66,7 @@ const signup = async (req, res) => {
 const login = async (req, res) => {
     try{
         const {userName, password} = req.body
-        const user = await user.findOne({userName: userName})
+        const user = await User.findOne({userName: userName})
 
         const isPasswordCorrect = await bcrypt.compare(password, user?.password || "")
 
@@ -76,7 +76,7 @@ const login = async (req, res) => {
 
         generateToken(user._id, res)
 
-        // res.ststus(200).json({message: "User Login Sucessfully"})
+        // res.status(200).json({message: "User Login Sucessfully"})
         // For testing with postman
         res.status(200).json({
             _id: user._id,
@@ -90,7 +90,6 @@ const login = async (req, res) => {
             bio: user.bio,
             link: user.link
         })
-
     }
     catch(error){
         console.log(`Error in Login Controller: ${error}`)
@@ -99,8 +98,16 @@ const login = async (req, res) => {
 }
 
 const logout = (req, res) => {
-    res.send("logout")
+    try{
+        res.cookie("jwt", "", {maxAge: 0})
+        res.status(200).json({message: "Logout Sucessfully"})
+    }
+    catch(error){
+        console.log(`Error in Logout Controller: ${error}`)
+        return res.status(500).json({error: "Internal Server Error"})
+    }
 }
+
 
 
 export { signup, login, logout }
