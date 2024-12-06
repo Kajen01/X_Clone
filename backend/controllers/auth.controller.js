@@ -1,6 +1,7 @@
+import bcrypt from "bcryptjs"
+
 import User from "../models/user.model.js"
 import generateToken from "../utils/generateToken.js"
-import bcrypt from "bcryptjs"
 
 const signup = async (req, res) => {
     try {
@@ -108,6 +109,15 @@ const logout = (req, res) => {
     }
 }
 
+const getMe = async (req, res) => {
+    try{
+        const user = await User.findOne({_id: req.user._id}).select("-password")
+        res.status(200).json(user)
+    }
+    catch(error){
+        console.log(`Error in getMe Controller: ${error}`)
+        return res.status(500).json({error: "Internal Server Error"})
+    }
+}
 
-
-export { signup, login, logout }
+export { signup, login, logout, getMe }
