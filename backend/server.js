@@ -5,6 +5,8 @@ import cloudinary from "cloudinary"
 
 import authRoute from "./routes/auth.route.js"
 import userRoute from "./routes/users.route.js"
+import postRoute from "./routes/users.route.js"
+
 import connectDB from "./db/connectDB.js"
 
 dotenv.config()
@@ -24,6 +26,7 @@ app.use(cookieParser())
 
 app.use("/api/auth", authRoute)
 app.use("/api/users", userRoute)
+app.use("/api/posts", postRoute)
 
 
 app.listen(PORT, () => {

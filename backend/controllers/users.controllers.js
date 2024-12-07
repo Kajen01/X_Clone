@@ -3,8 +3,6 @@ import User from "../models/user.model.js"
 import bcrypt from "bcryptjs"
 import cloudinary from "cloudinary"
 
-const { genSalt } = bcrypt;
-
 export const getProfile = async (req, res) => {
     try {
         const {userName} = req.params
@@ -96,9 +94,47 @@ export const getSuggestedUsers = async (req, res) => {
 export const updateUser = async (req, res) => {
     try{
         const userId = req.user._id
-        let {userName, fullName, email, currentPassword, newPassword, profileImg, coverImg, bio, link} = req.body
+        const {userName, fullName, email, currentPassword, newPassword, bio, link} = req.body
+        let {profileImg, coverImg} = req.body
         let user = await User.findById(userId)
 
+        if(!user){
+            return res.status(400).json({error: "User Not Found"})
+        }
+
+        if((!newPassword && currentPassword) || (newPassword && !currentPassword)){
+            return res.status(400).json({error: "Please provide newPassword and currentPassword"})
+        }
+
+        if(currentPassword && newPassword){
+            const isMatch = await bcrypt.compare(currentPassword, user.password)
+            if(isMatch){
+                return res.status(400).json({error: "Current password is incorrect"})
+            }
+            if(newPassword.length < 6){
+                return res.status(400).json({error: "New password length should be in 6 characters"})
+            }
+
+            const salt = await bcrypt.genSalt(10)
+            const hashedPassword = await bcrypt.hash(newPassword, salt)
+            user.passwrod = hashedPassword
+        }
+
+        // if(profileImg){
+        //     if(user.profileImg){
+        //         await cloudinary.uploader.destroy(user.profileImg.split('/').pop().split('.')[0])
+        //     }
+        //     const uploadedResponse = await cloudinary.uploader.upload(profileImg)
+        //     profileImg = uploadedResponse.secure_url
+        // }
+
+        // if(coverImg){
+        //     if(user.coverImg){
+        //         await cloudinary.uploader.destroy(user.coverImg.split('/').pop().split('.')[0])
+        //     }
+        //     const uploadedResponse = await cloudinary.uploader.upload(coverImg)
+        //     coverImg = uploadedResponse.secure_url
+        // }
 
         user.userName = userName || user.userName
         user.fullName = fullName || user.fullName
