@@ -13,7 +13,7 @@ export const createPost = async (req, res) => {
         const user = await User.findOne({_id: userId})
 
         if(!user){
-            return res.status(400).json({error: "User Not Found"})
+            return res.status(404).json({error: "User Not Found"})
         }
 
         if(!text && !img){
@@ -230,7 +230,7 @@ export const getUserPosts = async (req, res) => {
 		if (!user) {
             return res.status(404).json({ error: "User not found" });
         }
-        
+
 		const posts = await Post.find({ user: user._id })
 			.sort({ createdAt: -1 })
 			.populate({
