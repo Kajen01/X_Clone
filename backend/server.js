@@ -5,7 +5,7 @@ import cloudinary from "cloudinary"
 
 import authRoute from "./routes/auth.route.js"
 import userRoute from "./routes/users.route.js"
-import postRoute from "./routes/users.route.js"
+import postRoute from "./routes/post.route.js"
 
 import connectDB from "./db/connectDB.js"
 

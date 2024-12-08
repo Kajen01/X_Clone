@@ -8,7 +8,7 @@ export const createPost = async (req, res) => {
         const {text} = req.body
         let {img} = req.body
 
-        const userId = req.body._id.toString()
+        const userId = req.user._id
         const user = await User.findOne({_id: userId})
 
         if(!user){
@@ -26,8 +26,8 @@ export const createPost = async (req, res) => {
 
         const newPost = new Post({
             user: userId,
-            text: text,
-            img: img
+            text: text || "",
+            img: img || null
         })
         await newPost.save()
 
@@ -38,3 +38,33 @@ export const createPost = async (req, res) => {
         res.status(500).json({error: "Internal Server Error"})
     }
 }
+
+export const deletePost = async (req, res) => {
+    try {
+        const {id} = req.params
+
+        const post = await Post.findOne({_id: id})
+        if(!post) {
+            return res.status(404).json({error: "Post Not Found"})
+        }
+
+        if(post.user.toString() !== req.user._id.toString()){
+            return res.status(401).json({error: "You are not authorized to delete the post"})
+        }
+
+        if(post.img){
+            const imgId = post.img.split('/').pop().split('.')[0]
+            await cloudinary.uploader.destroy(imgId)
+        }
+
+        await post.findByIdAndDelete({_id: id})
+        res.status(200).json({message: "Post deleted sucessfully"})
+    }
+    catch(error){
+        console.log(`Error in deletePost Controller: ${error}`)
+        res.status(500).json({error: "Internal Server Error"})
+    }
+}
+
+
+
