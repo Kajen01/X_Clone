@@ -18,6 +18,38 @@ const SignUpPage = () => {
 		password: "",
 	});
 
+	const queryClient = useQueryClient();
+
+	const { mutate, isError, isPending, error } = useMutation({
+		mutationFn: async ({ email, username, fullName, password }) => {
+			try {
+				const res = await fetch("/api/auth/signup", {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({ email, username, fullName, password }),
+				});
+
+				const data = await res.json();
+				if (!res.ok) throw new Error(data.error || "Failed to create account");
+				console.log(data);
+				return data;
+			} catch (error) {
+				console.error(error);
+				throw error;
+			}
+		},
+		onSuccess: () => {
+			toast.success("Account created successfully");
+
+			{
+				/* Added this line below, after recording the video. I forgot to add this while recording, sorry, thx. */
+			}
+			queryClient.invalidateQueries({ queryKey: ["authUser"] });
+		},
+	});
+
 	const handleSubmit = (e) => {
 		e.preventDefault(); // page won't reload
 		mutate(formData);
